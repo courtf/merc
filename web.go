@@ -18,7 +18,7 @@ func (w World) Resolution(zoom uint, tileSize int) float64 {
 	return w.Circumference / float64(w.PixelCircumference(zoom, tileSize))
 }
 
-func (w World) MercToPixels(x, y float64, zoom uint, tileSize int) (px, py float64) {
+func (w World) MercToPixel(x, y float64, zoom uint, tileSize int) (px, py float64) {
 	metersPerPixel := w.Resolution(zoom, tileSize)
 
 	// this shift moves the cordinate system to [0, Circumference]
@@ -35,9 +35,23 @@ func (w World) MercToPixels(x, y float64, zoom uint, tileSize int) (px, py float
 }
 
 func (w World) MercToTile(x, y float64, zoom uint, tileSize int) (tx, ty int) {
-	px, py := w.MercToPixels(x, y, zoom, tileSize)
+	px, py := w.MercToPixel(x, y, zoom, tileSize)
+	tx, ty = w.PixelToTile(px, py, tileSize)
+	return
+}
 
+func (w World) PixelToTile(px, py float64, tileSize int) (tx, ty int) {
 	tx = int(math.Floor(px / float64(tileSize)))
 	ty = int(math.Floor(py / float64(tileSize)))
 	return
+}
+
+func (w World) LonLatToPixel(lon, lat float64, zoom uint, tileSize int) (px, py float64) {
+	x, y := w.LonLatToMerc(lon, lat)
+	return w.MercToPixel(x, y, zoom, tileSize)
+}
+
+func (w World) LonLatToTile(lon, lat float64, zoom uint, tileSize int) (tx, ty int) {
+	px, py := w.LonLatToPixel(lon, lat, zoom, tileSize)
+	return w.PixelToTile(px, py, tileSize)
 }
